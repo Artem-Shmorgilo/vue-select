@@ -697,7 +697,7 @@
             } else {
               value = this.reduce(value);
             }
-            if(JSON.stringify(this.value).includes(JSON.stringify(value))) {
+            if(JSON.stringify(this.value) === JSON.stringify(value)) {
               this.typeAheadPointer = index;
             }
           })
