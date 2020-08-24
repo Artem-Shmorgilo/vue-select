@@ -540,6 +540,15 @@
       },
 
       /**
+       * When dropdown opens, scrolls to selected option
+       * @type {Boolean}
+       */
+      selectedIntoView: {
+        type: Boolean,
+        default: true
+      },
+
+      /**
        * When `appendToBody` is true, this function is responsible for
        * positioning the drop down list.
        *
@@ -622,6 +631,12 @@
       },
 
       open(isOpen) {
+
+        if(isOpen && this.selectedIntoView) {
+          this.setTypeAheadPointerToSelected();
+          this.scrollListToViewSelectedOption();
+        }
+
         this.$emit(isOpen ? 'open' : 'close');
       }
     },
@@ -631,6 +646,10 @@
 
       if (typeof this.value !== "undefined" && this.isTrackingValues) {
         this.setInternalValueFromOptions(this.value)
+      }
+
+      if (this.selectedIntoView) {
+        this.setTypeAheadPointerToSelected();
       }
 
       this.$on('option:created', this.pushTag)
@@ -648,6 +667,40 @@
           this.$data._value = value.map(val => this.findOptionFromReducedValue(val));
         } else {
           this.$data._value = this.findOptionFromReducedValue(value);
+        }
+      },
+
+      /**
+       * Scrolls list to selected option.
+       * @return {void}
+       */
+      scrollListToViewSelectedOption() {
+        setTimeout(() => {
+          let target = document.querySelector(`#vs${this.uid}__option-${this.typeAheadPointer}`)
+          if (target) {
+            target.parentNode.scrollTop = target.offsetTop;
+          }
+        }, 50)
+      },
+
+      /**
+       * Sets TypeAheadPointerTo to selected option.
+       * @return {void}
+       */
+      setTypeAheadPointerToSelected() {
+        if (this.value && this.options) {
+          this.options.forEach((option, index) => {
+            let value = option
+
+            if (Array.isArray(value)) {
+              value = value.map(val => this.reduce(val));
+            } else {
+              value = this.reduce(value);
+            }
+            if(JSON.stringify(this.value).includes(JSON.stringify(value))) {
+              this.typeAheadPointer = index;
+            }
+          })
         }
       },
 
